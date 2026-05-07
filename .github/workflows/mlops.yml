@@ -87,7 +87,6 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-          script: |
             set -e
             PROJECT_DIR=~/Day21-Track2-2A202600121-LuuQuangLuc
             
