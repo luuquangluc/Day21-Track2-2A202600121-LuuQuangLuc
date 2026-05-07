@@ -80,13 +80,41 @@ jobs:
     needs: eval
     runs-on: ubuntu-latest
     steps:
-      - name: Restart service on EC2
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            # 1. Vao thu muc du an (tao moi neu chua co - tuy vao setup cua ban)
+            cd ~/Day21-Track2-2A202600121-LuuQuangLuc || (git clone https://github.com/${{ github.repository }}.git ~/Day21-Track2-2A202600121-LuuQuangLuc && cd ~/Day21-Track2-2A202600121-LuuQuangLuc)
+            
+            # 2. Cap nhat code va dependencies
+            git pull origin master
+            pip install -r requirements.txt
+            
+            # 3. Tu dong tao file service neu chua ton tai
+            sudo bash -c "cat > /etc/systemd/system/mlops-serve.service <<EOF
+            [Unit]
+            Description=MLOps Serving API
+            After=network.target
+
+            [Service]
+            User=${{ secrets.VM_USER }}
+            WorkingDirectory=/home/${{ secrets.VM_USER }}/Day21-Track2-2A202600121-LuuQuangLuc
+            ExecStart=/usr/bin/python3 -m uvicorn src.serve:app --host 0.0.0.0 --port 8000
+            Restart=always
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF"
+
+            # 4. Reload va Restart service
+            sudo systemctl daemon-reload
+            sudo systemctl enable mlops-serve
             sudo systemctl restart mlops-serve
-            sleep 5
+            
+            # 5. Kiem tra suc khoe
+            sleep 10
             curl --fail http://localhost:8000/health || exit 1
