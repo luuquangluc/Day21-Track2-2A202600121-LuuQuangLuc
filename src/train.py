@@ -9,9 +9,9 @@ from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
 
-# Su dung duong dan tuyet doi cross-platform de tranh loi Windows path tren Linux CI
-if not os.environ.get("MLFLOW_TRACKING_URI"):
-    mlflow.set_tracking_uri(Path("mlruns").resolve().as_uri())
+mlruns_dir = Path("mlruns").resolve()
+mlflow.set_tracking_uri(f"file://{mlruns_dir}")
+mlflow.set_experiment("default")
 
 EVAL_THRESHOLD = 0.70
 

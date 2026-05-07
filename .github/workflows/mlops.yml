@@ -21,8 +21,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run tests
-        env:
-          MLFLOW_TRACKING_URI: mlruns
         run: pytest tests/ -v
 
   train:
