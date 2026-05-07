@@ -111,6 +111,7 @@ jobs:
             [Service]
             User=${{ secrets.VM_USER }}
             WorkingDirectory=$PROJECT_DIR
+            Environment=CLOUD_BUCKET=${{ secrets.CLOUD_BUCKET }}
             ExecStart=/usr/bin/python3 -m uvicorn src.serve:app --host 0.0.0.0 --port 8000
             Restart=always
 
@@ -125,4 +126,8 @@ jobs:
             
             # 5. Kiem tra suc khoe
             sleep 15
-            curl --fail http://localhost:8000/health || exit 1
+            if ! curl --fail http://localhost:8000/health; then
+              echo "Deployment failed! Printing service logs:"
+              sudo journalctl -u mlops-serve -n 50
+              exit 1
+            fi
