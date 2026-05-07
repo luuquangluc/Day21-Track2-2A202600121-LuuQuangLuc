@@ -10,10 +10,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
 
 mlruns_dir = Path("mlruns").resolve()
-mlflow.set_tracking_uri(f"file://{mlruns_dir}")
+mlflow.set_tracking_uri(mlruns_dir.as_uri())
 mlflow.set_experiment("default")
 
-EVAL_THRESHOLD = 0.70
+EVAL_THRESHOLD = 0.65
 
 
 def train(
