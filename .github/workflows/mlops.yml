@@ -87,14 +87,23 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            # 1. Vao thu muc du an (tao moi neu chua co - tuy vao setup cua ban)
-            cd ~/Day21-Track2-2A202600121-LuuQuangLuc || (git clone https://github.com/${{ github.repository }}.git ~/Day21-Track2-2A202600121-LuuQuangLuc && cd ~/Day21-Track2-2A202600121-LuuQuangLuc)
+          script: |
+            set -e
+            PROJECT_DIR=~/Day21-Track2-2A202600121-LuuQuangLuc
             
-            # 2. Cap nhat code va dependencies
-            git pull origin master
-            pip install -r requirements.txt
+            # 1. Clone hoac Update code
+            if [ ! -d "$PROJECT_DIR" ]; then
+              git clone https://github.com/${{ github.repository }}.git $PROJECT_DIR
+            fi
+            cd $PROJECT_DIR
+            git pull origin master || echo "Already up to date"
             
-            # 3. Tu dong tao file service neu chua ton tai
+            # 2. Cai dat pip va dependencies
+            sudo apt-get update
+            sudo apt-get install -y python3-pip
+            pip3 install -r requirements.txt
+            
+            # 3. Tu dong tao file service
             sudo bash -c "cat > /etc/systemd/system/mlops-serve.service <<EOF
             [Unit]
             Description=MLOps Serving API
@@ -102,7 +111,7 @@ jobs:
 
             [Service]
             User=${{ secrets.VM_USER }}
-            WorkingDirectory=/home/${{ secrets.VM_USER }}/Day21-Track2-2A202600121-LuuQuangLuc
+            WorkingDirectory=$PROJECT_DIR
             ExecStart=/usr/bin/python3 -m uvicorn src.serve:app --host 0.0.0.0 --port 8000
             Restart=always
 
@@ -116,5 +125,5 @@ jobs:
             sudo systemctl restart mlops-serve
             
             # 5. Kiem tra suc khoe
-            sleep 10
+            sleep 15
             curl --fail http://localhost:8000/health || exit 1
