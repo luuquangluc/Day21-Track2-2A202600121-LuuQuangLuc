@@ -6,9 +6,6 @@ import numpy as np
 import pandas as pd
 from src.train import train
 
-# Set local tracking URI for tests
-mlflow.set_tracking_uri("file:mlruns_test")
-
 FEATURE_NAMES = [
     "fixed_acidity", "volatile_acidity", "citric_acid", "residual_sugar",
     "chlorides", "free_sulfur_dioxide", "total_sulfur_dioxide", "density",
@@ -43,6 +40,7 @@ def _make_temp_data(tmp_path):
 
 def test_train_returns_float(tmp_path):
     """Kiem tra ham train() tra ve mot so thuc trong khoang [0, 1]."""
+    mlflow.set_tracking_uri(tmp_path.as_uri())
     train_path, eval_path = _make_temp_data(tmp_path)
     acc = train(
         {"n_estimators": 10, "max_depth": 3, "min_samples_split": 2},
@@ -54,6 +52,7 @@ def test_train_returns_float(tmp_path):
 
 def test_metrics_file_created(tmp_path):
     """Kiem tra file outputs/metrics.json duoc tao sau khi huan luyen."""
+    mlflow.set_tracking_uri(tmp_path.as_uri())
     # Reset file outputs/metrics.json neu ton tai de test chinh xac
     metrics_file = "outputs/metrics.json"
     if os.path.exists(metrics_file):
@@ -74,6 +73,7 @@ def test_metrics_file_created(tmp_path):
 
 def test_model_file_created(tmp_path):
     """Kiem tra file models/model.pkl duoc tao sau khi huan luyen."""
+    mlflow.set_tracking_uri(tmp_path.as_uri())
     model_file = "models/model.pkl"
     if os.path.exists(model_file):
         os.remove(model_file)
