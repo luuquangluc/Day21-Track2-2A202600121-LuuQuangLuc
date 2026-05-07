@@ -1,12 +1,13 @@
 import mlflow
+import pytest
 import os
 import json
 import numpy as np
 import pandas as pd
 from src.train import train
 
-# Set local tracking URI for tests - dung duong dan tuong doi de chay duoc tren ca Windows va Linux
-mlflow.set_tracking_uri("file:./mlruns_test")
+# Set local tracking URI for tests
+mlflow.set_tracking_uri("file:mlruns_test")
 
 FEATURE_NAMES = [
     "fixed_acidity", "volatile_acidity", "citric_acid", "residual_sugar",
